@@ -8,10 +8,14 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '77777777',
     database: process.env.DB_NAME || 'ecommerce_db',
     
+    
+    ssl: process.env.NODE_ENV === 'production' ? {
+        rejectUnauthorized: false
+    } : false,
+    
     waitForConnections: true,
     connectionLimit: 20,
     queueLimit: 0,
-    
     charset: 'utf8mb4',
     timezone: '+00:00'
 });
@@ -19,10 +23,11 @@ const pool = mysql.createPool({
 const connectDB = async () => {
     try {
         const connection = await pool.getConnection();
-        console.log('✅ MySQL Connected to ecommerce_db');
+        console.log('✅ MySQL Connected Successfully');
         connection.release();
     } catch (err) {
         console.error('❌ Database Connection Failed:', err.message);
+        
         process.exit(1);
     }
 };
