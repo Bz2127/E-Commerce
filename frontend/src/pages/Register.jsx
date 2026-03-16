@@ -94,7 +94,7 @@ const Register = ({ isSellerRegistration = false }) => {
 
   try {
     // 1. Verify OTP (Using relative path to match your axios config)
-    await axios.post('http://localhost:5000/api/auth/verify-otp', {
+    await axios.post('/auth/verify-otp', {
       email: userEmail,
       otp: otp.trim()
     });
@@ -105,7 +105,7 @@ const Register = ({ isSellerRegistration = false }) => {
       setStep(3); // Show "Awaiting Approval"
     } else {
       // 2. Auto-login customer (Fixed Port to 5000)
-      const loginRes = await axios.post('http://localhost:5000/api/auth/login', {
+      const loginRes = await axios.post('/auth/login', {
         email: userEmail,
         password: formData.password
       });
@@ -132,7 +132,7 @@ const handleResendOtp = async () => {
 
   try {
     const res = await axios.post(
-      "http://localhost:5000/api/auth/resend-otp",
+      "/auth/resend-otp",
       { email: userEmail },
       { headers: { "Content-Type": "application/json" } }
     );

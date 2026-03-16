@@ -29,7 +29,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/api/auth/login`, { 
+      const res = await axios.post(`${API_URL}/auth/login`, { 
         email, 
         password, 
         rememberMe 
@@ -85,7 +85,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
+      await axios.post(`${API_URL}/auth/forgot-password`, { email });
       setMessage("Success! Check console for reset link (production: email sent).");
       setTimeout(() => {
         setIsForgotMode(false);
