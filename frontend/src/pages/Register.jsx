@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api';
+import api from '../utils/api'
 import { User, Mail, Phone, Lock, Building2, FileCheck, ArrowRight, ShoppingBag, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 const Register = ({ isSellerRegistration = false }) => {

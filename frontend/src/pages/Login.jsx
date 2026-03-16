@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import api from '../api'
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingBag, Mail, Lock, ArrowLeft } from 'lucide-react'; // Removed unused CheckSquare
+import { ShoppingBag, Mail, Lock, ArrowLeft } from 'lucide-react'; 
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,9 +18,6 @@ const Login = () => {
   const location = useLocation();
 
   const from = location.state?.from || "/";
-
-  // Use environment variable for API URL
-  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,8 +48,6 @@ const Login = () => {
         return;
       }
 
-      // Set global header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       // Store refresh token (Remember Me)
       if (rememberMe && refreshToken) {
