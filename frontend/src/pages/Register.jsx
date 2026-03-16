@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { User, Mail, Phone, Lock, Building2, FileCheck, ArrowRight, ShoppingBag, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 const Register = ({ isSellerRegistration = false }) => {
@@ -62,7 +62,7 @@ const Register = ({ isSellerRegistration = false }) => {
   }
 }
 
-    const res = await axios.post(`/auth/${endpoint}`, payload, {
+    const res = await api.post(`/auth/${endpoint}`, payload, {
         headers: {
           "Content-Type": "application/json"
         }
@@ -94,7 +94,7 @@ const Register = ({ isSellerRegistration = false }) => {
 
   try {
     // 1. Verify OTP (Using relative path to match your axios config)
-    await axios.post('/auth/verify-otp', {
+    await api.post('/auth/verify-otp', {
       email: userEmail,
       otp: otp.trim()
     });
@@ -105,7 +105,7 @@ const Register = ({ isSellerRegistration = false }) => {
       setStep(3); // Show "Awaiting Approval"
     } else {
       // 2. Auto-login customer (Fixed Port to 5000)
-      const loginRes = await axios.post('/auth/login', {
+      const loginRes = await api.post('/auth/login', {
         email: userEmail,
         password: formData.password
       });
@@ -131,7 +131,7 @@ const handleResendOtp = async () => {
   setStatusMessage("");
 
   try {
-    const res = await axios.post(
+    const res = await api.post(
       "/auth/resend-otp",
       { email: userEmail },
       { headers: { "Content-Type": "application/json" } }

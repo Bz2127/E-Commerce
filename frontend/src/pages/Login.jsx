@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api'
 import { useAuth } from '../context/AuthContext';
 import { ShoppingBag, Mail, Lock, ArrowLeft } from 'lucide-react'; // Removed unused CheckSquare
 
@@ -29,7 +29,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/auth/login`, { 
+      const res = await api.post('/auth/login',{ 
         email, 
         password, 
         rememberMe 
@@ -85,7 +85,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await axios.post(`${API_URL}/auth/forgot-password`, { email });
+      await api.post('/auth/forgot-password', { email });
       setMessage("Success! Check console for reset link (production: email sent).");
       setTimeout(() => {
         setIsForgotMode(false);

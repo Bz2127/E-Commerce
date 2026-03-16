@@ -9,18 +9,14 @@ const fs = require('fs');
 const compression = require('compression');
 
 const { connectDB } = require('./config/db');
-const updateSellerBalance = require('./utils/updateSellerBalance');
 
 const app = express();
-
-
 app.set('trust proxy', 1);
 
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
-
 
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -32,15 +28,15 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('dev'));
 
-
 app.use(cors({
-    origin: true, 
-    credentials: true
+    origin: '*', 
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 }));
 
 app.use('/uploads', express.static(uploadsDir));
 
-// WELCOME ROUTE (To test if the URL works)
+// WELCOME ROUTE
 app.get('/', (req, res) => {
     res.send('<h1>🚀 EthMarket API is LIVE</h1><p>Check health at: <a href="/api/health">/api/health</a></p>');
 });
@@ -84,12 +80,18 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/banners", bannerRoutes);
 
 // HEALTH CHECK
-app.get('/api/health', async (req, res) => {
-    try {
-        res.json({ status: 'OK', database: 'connected', timestamp: new Date() });
-    } catch (err) {
-        res.status(500).json({ status: 'ERROR' });
-    }
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        database: 'Attempting connection...', 
+        timestamp: new Date() 
+    });
+});
+
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
 // 404 HANDLER
@@ -98,10 +100,17 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
+
 const startServer = async () => {
-    await connectDB();
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-    });
+    try {
+        await connectDB();
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('❌ Failed to start server:', error);
+        process.exit(1);
+    }
 };
+
 startServer();
