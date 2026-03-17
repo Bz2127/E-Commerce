@@ -137,8 +137,8 @@ const createOrder = async (req, res) => {
             email,
             first_name: req.user.name || "Customer",
             tx_ref,
-            callback_url: `http://localhost:5000/api/orders/verify-payment/${tx_ref}`,
-            return_url: `http://localhost:3000/order-success?trx_ref=${tx_ref}`
+           callback_url: `https://ecommerce-backend-t706.onrender.com/api/orders/verify-payment/${tx_ref}`,
+           return_url: `https://ecommerce-frontend-6y9o.onrender.com/order-success?trx_ref=${tx_ref}`
         });
 
         await connection.commit();
@@ -289,7 +289,7 @@ const verifyPaymentCallback = async (req, res) => {
         }
 
         await connection.commit();
-        return res.redirect(`http://localhost:3000/order-success?trx_ref=${tx_ref}`);
+       return res.redirect(`https://ecommerce-frontend-6y9o.onrender.com/order-success?trx_ref=${tx_ref}`);
 
     } catch (err) {
         if (connection) await connection.rollback();
