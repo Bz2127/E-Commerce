@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import api from "../../utils/api"; 
 import toast from "react-hot-toast";
-import { Search, CheckCircle, XCircle, Package, ShieldCheck, Info, Store } from "lucide-center";
+import { Search, CheckCircle, XCircle, Package, ShieldCheck, Info, Store } from "lucide-react";
 
 const ProductModeration = () => {
   const [products, setProducts] = useState([]);
