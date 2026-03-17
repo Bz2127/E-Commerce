@@ -25,7 +25,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.options('*', cors());
+app.options('/*', cors());
 
 app.use(compression());
 app.use(express.json({ limit: '50mb' }));
