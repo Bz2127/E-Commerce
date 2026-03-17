@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseURL = process.env.REACT_APP_API_URL || "https://ecommerce-backend-t7o6.onrender.com/api";
+const baseURL = process.env.REACT_APP_API_URL || "https://ecommerce-backend-t706.onrender.com/api";
 
 const api = axios.create({
   baseURL: baseURL,
