@@ -7,8 +7,12 @@ const path = require('path');
 // ================================
 const getImageUrl = (image_url) => {
     if (!image_url) return null;
+
     if (image_url.startsWith('http')) return image_url;
-    return `http://localhost:5000/uploads/products/${path.basename(image_url)}`;  // ✅ Added /products/
+
+    const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
+
+    return `${BASE_URL}/uploads/products/${path.basename(image_url)}`;
 };
 
 // ================================
