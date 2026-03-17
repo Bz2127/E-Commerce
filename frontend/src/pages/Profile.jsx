@@ -112,17 +112,28 @@ const Profile = () => {
     }
   };
 
-  const getProfileImage = () => {
-    if (previewImage) return previewImage;
-    if (user?.profile_pic) {
-      // If it's a full URL (like Google login), use it; otherwise, prefix with backend URL
-      return user.profile_pic.startsWith('http') 
-        ? user.profile_pic 
-        : `http://localhost:5000/${user.profile_pic}`;
-    }
-    return null;
-  };
+ const getProfileImage = () => {
+  if (previewImage) return previewImage;
 
+  if (user?.profile_pic) {
+    const pic = user.profile_pic;
+
+    // If already full URL (e.g., Google), return as is
+    if (pic.startsWith('http') || pic.startsWith('data:image')) {
+      return pic;
+    }
+
+    
+    const baseUrl =
+      process.env.REACT_APP_BASE_URL || "https://ecommerce-backend-t706.onrender.com";
+
+    return pic.startsWith('/')
+      ? `${baseUrl}${pic}`
+      : `${baseUrl}/${pic}`;
+  }
+
+  return null;
+};
   const handleSaveNotifications = async () => {
     setIsSavingNotif(true);
     // Demonstration delay

@@ -52,13 +52,20 @@ const Navbar = () => {
     }
   };
 
-  const getProfileImage = () => {
-    if (!user?.profile_pic) return null;
-    const pic = user.profile_pic;
-    if (pic.startsWith('http') || pic.startsWith('data:image')) return pic;
-    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    return pic.startsWith('/') ? `${backendUrl}${pic}` : `${backendUrl}/${pic}`;
-  };
+const getProfileImage = () => {
+  if (!user?.profile_pic) return null;
+
+  const pic = user.profile_pic;
+
+  if (pic.startsWith('http') || pic.startsWith('data:image')) return pic;
+
+  const baseUrl =
+    process.env.REACT_APP_BASE_URL || "https://ecommerce-backend-t706.onrender.com";
+
+  return pic.startsWith('/')
+    ? `${baseUrl}${pic}`
+    : `${baseUrl}/${pic}`;
+};
 
   return (
     <nav style={styles.navContainer}>

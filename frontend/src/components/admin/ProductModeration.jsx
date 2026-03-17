@@ -7,8 +7,9 @@ import { Search, CheckCircle, XCircle, Package, ShieldCheck, Info, Store } from 
 const ProductModeration = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); // Added search state
-
+  const [searchTerm, setSearchTerm] = useState("");
+   const baseUrl =
+  process.env.REACT_APP_BASE_URL || "https://ecommerce-backend-t706.onrender.com"; 
   const fetchPendingProducts = async () => {
     try {
       setLoading(true);
@@ -138,12 +139,15 @@ const ProductModeration = () => {
                         <td style={{ padding: "16px 24px" }}>
                           <div style={{ width: "60px", height: "60px", borderRadius: "12px", backgroundColor: "#f1f5f9", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #e2e8f0" }}>
                             {product.images && product.images.length > 0 ? (
-                              <img 
-                                src={`http://localhost:5000/uploads/products/${product.images[0]}`} 
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                                alt="product"
-                                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${product.name}&background=random`; }}
-                              />
+                             
+
+                                       <img 
+                                             src={product.images?.[0] ? `${baseUrl}/uploads/products/${product.images[0]}`: `https://ui-avatars.com/api/?name=${product.name}&background=random` }
+                                               style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                                                    alt="product"
+                                    onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${product.name}&background=random`;
+                                            }}
+                                      />
                             ) : (
                               <div style={{ fontSize: "10px", color: "#94a3b8" }}>No Image</div>
                             )}

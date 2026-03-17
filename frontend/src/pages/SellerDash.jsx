@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { 
   LayoutDashboard, ShoppingBag, PackagePlus, Wallet, 
   LogOut, Settings, User, Building, 
@@ -95,7 +95,7 @@ const [stats, setStats] = useState({
   salesHistory: []
 });
   useEffect(() => {
-    axios.get('http://localhost:5000/api/seller/stats', config)
+    api.get('/seller/stats')
       .then(res => setStats({ ...res.data, topProducts: res.data.topProducts || [], salesHistory: res.data.salesHistory || [] }))
       .catch(err => console.error(err));
   }, [config]);
@@ -176,18 +176,20 @@ const toggleBtnStyle = {
 
 const SellerOrders = ({ config }) => {
   const [orders, setOrders] = useState([]);
-  const fetchOrders = useCallback(async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/seller/orders', config);
-      setOrders(res.data);
-    } catch (err) { console.error(err); }
-  }, [config]);
+const fetchOrders = useCallback(async () => {
+  try {
+    const res = await api.get('/seller/orders');
+    setOrders(res.data);
+  } catch (err) {
+    console.error(err);
+  }
+}, []);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/seller/orders/status/${id}`, { status }, config);
+      api.get('/seller/stats')
       fetchOrders();
       showSuccessToast(`Order marked as ${status}`);
     } catch (err) { toast.error("Status update failed"); }
@@ -255,7 +257,7 @@ const SellerWallet = ({ config }) => {
   const [payoutData, setPayoutData] = useState({ amount: '', bank: 'CBE' });
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/seller/stats', config)
+    api.get('/seller/stats')
       .then(res => { setBalance(res.data.walletBalance); setHistory(res.data.withdrawHistory || []); })
       .catch(err => console.log(err));
   }, [config]);
@@ -264,7 +266,7 @@ const SellerWallet = ({ config }) => {
     e.preventDefault();
     if (parseFloat(payoutData.amount) > balance) return toast.error("Insufficient funds");
     try {
-      await axios.post('http://localhost:5000/api/seller/payout', { amount: payoutData.amount }, config);
+      await api.post('/seller/payout', { amount: payoutData.amount });
       showSuccessToast("Payout request submitted!");
       setShowModal(false);
     } catch (err) { toast.error("Request failed"); }
@@ -334,7 +336,7 @@ const ManageProducts = ({ config, products, fetchProducts }) => {
   const del = async (id) => {
     if (window.confirm("Delete this product permanently?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/seller/products/${id}`, config);
+        await api.delete(`/seller/products/${id}`);
         setProds(prev => prev.filter(p => p.id !== id));
         if (fetchProducts) fetchProducts();
         showSuccessToast("Product removed");
@@ -352,7 +354,7 @@ const ManageProducts = ({ config, products, fetchProducts }) => {
         stock_quantity: Number(editingProduct.stock_quantity),
         variants: [{ sku: editingProduct.sku || "", size: editingProduct.size || "", color: editingProduct.color || "", price: Number(editingProduct.base_price), stock_quantity: Number(editingProduct.stock_quantity) }]
       };
-      await axios.put(`http://localhost:5000/api/seller/products/${editingProduct.id}`, updateData, config);
+     await api.put(`/seller/products/${editingProduct.id}`, updateData);
       showSuccessToast("Product updated");
       setEditingProduct(null);
       if (fetchProducts) fetchProducts();
@@ -379,7 +381,9 @@ const ManageProducts = ({ config, products, fetchProducts }) => {
               try {
                 const parsed = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
                 if (Array.isArray(parsed) && parsed[0]) {
-                  displayImage = parsed[0].startsWith('http') ? parsed[0] : `http://localhost:5000/${parsed[0].replace(/^\/+/, '')}`;
+                  displayImage = parsed[0].startsWith('http') 
+  ? parsed[0] 
+  : `${process.env.REACT_APP_BASE_URL}/${parsed[0].replace(/^\/+/, '')}`;
                 }
               } catch (e) {}
 
@@ -461,21 +465,20 @@ const [selectedValues, setSelectedValues] = useState([]);
   // Fetch Categories and Brands for the dropdowns
  useEffect(() => {
 
-  axios.get("http://localhost:5000/api/categories").then(res => {
+  api.get("/categories").then(res => {
     if (res.data.success) setCategories(res.data.data);
   });
 
-  axios.get("http://localhost:5000/api/brands").then(res => {
+  api.get("/brands").then(res => {
     if (res.data.success) setBrands(res.data.data);
   });
 
-  axios.get("http://localhost:5000/api/attributes").then(res => {
+  api.get("/attributes").then(res => {
     if (res.data.success) {
       setAttributes(res.data.data);
 
       res.data.data.forEach(attr => {
-        axios
-          .get(`http://localhost:5000/api/attributes/value/${attr.id}`)
+       api.get(`/attributes/value/${attr.id}`)
           .then(v => {
             setAttributeValues(prev => ({
               ...prev,
@@ -521,9 +524,7 @@ form.append(
 
 form.append("attribute_values", JSON.stringify(selectedValues));
 
-      await axios.post("http://localhost:5000/api/seller/products", form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post("/seller/products", form);
 
       showSuccessToast("Product submitted successfully!");
       
@@ -686,7 +687,7 @@ const SellerFullSettings = () => {
     data.append('address', formData.address);
 
     try {
-      const res = await axios.put('/auth/profile', data);
+      const res = await api.put('/auth/profile', data);
       if (res.data.success) {
         login(token, res.data.user); // This updates the global state!
         toast.success("Profile updated successfully!");
@@ -698,7 +699,7 @@ const SellerFullSettings = () => {
     e.preventDefault();
     if (passData.new !== passData.confirm) return toast.error("Passwords don't match");
     try {
-      await axios.put('/auth/change-password', { currentPassword: passData.current, newPassword: passData.new });
+      await api.put('/auth/change-password', { currentPassword: passData.current, newPassword: passData.new });
       toast.success("Password updated!");
       setPassData({ current: '', new: '', confirm: '' });
     } catch (err) { toast.error(err.response?.data?.message || "Update failed"); }
@@ -755,13 +756,20 @@ const SellerDash = () => {
   const [products, setProducts] = useState([]);
 
   const config = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
-  const fetchProducts = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const res = await axios.get(`http://localhost:5000/api/seller/inventory`, config);
-      setProducts(Array.isArray(res.data.inventory) ? res.data.inventory : res.data || []);
-    } catch (err) { console.error(err); }
-  }, [user?.id, config]);
+ const fetchProducts = useCallback(async () => {
+  if (!user?.id) return;
+
+  try {
+    const res = await api.get('/seller/inventory');
+    setProducts(
+      Array.isArray(res.data.inventory)
+        ? res.data.inventory
+        : res.data || []
+    );
+  } catch (err) {
+    console.error(err);
+  }
+}, [user?.id]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
   useEffect(() => { localStorage.setItem('activeTab', activeTab); }, [activeTab]);
@@ -861,11 +869,15 @@ const SellerDash = () => {
     >
       {/* Dynamic Profile Image from AuthContext */}
       {user?.profile_pic ? (
-        <img 
-          src={user.profile_pic.startsWith('http') ? user.profile_pic : `http://localhost:5000/${user.profile_pic}`} 
-          alt="Profile" 
-          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} 
-        />
+<img 
+  src={
+    user?.profile_pic?.startsWith('http')
+      ? user.profile_pic
+      : `${process.env.REACT_APP_API_URL.replace('/api', '')}/${user.profile_pic}`
+  }
+  alt="Profile"
+  style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+/>
       ) : (
         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: BrandColors.primary, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
           {user?.name?.charAt(0)}
