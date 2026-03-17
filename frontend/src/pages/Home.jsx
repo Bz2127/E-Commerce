@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api"
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart, Heart, Eye, Truck, Headset, 
   ShieldCheck, ChevronRight, Star, Clock
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
-
-const API = `${process.env.REACT_APP_API_URL}/api`;
 
 // Core Brand Colors for Consistency
 const BrandColors = {
@@ -59,10 +57,10 @@ const Home = () => {
     const loadHomeProducts = async () => {
       try {
         const [flash, featured, best, arrivals] = await Promise.all([
-          axios.get(`${API}/products/flash-sales`),
-          axios.get(`${API}/products/featured`),
-          axios.get(`${API}/products/best-sellers`),
-          axios.get(`${API}/products/new-arrivals`)
+          api.get(`/products/flash-sales`),
+          api.get(`/products/featured`),
+          api.get(`/products/best-sellers`),
+          api.get(`/products/new-arrivals`)
         ]);
         setFlashProducts(Array.isArray(flash.data) ? flash.data : flash.data.products || []);
         setFeaturedProducts(Array.isArray(featured.data) ? featured.data : featured.data.products || []);
@@ -80,13 +78,13 @@ const Home = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get(`${API}/categories`);
+        const res = await api.get(`/categories`);
         if (res.data && res.data.success) { setCategories(res.data.data); }
       } catch (err) { console.error("Failed to load categories:", err); }
     };
     const fetchBanners = async () => {
       try {
-        const res = await axios.get(`${API}/banners`); 
+        const res = await api.get('/banners');
         if (res.data) { setBanners(res.data); }
       } catch (err) { console.error("Failed to load banners", err); }
     };
@@ -108,7 +106,7 @@ const Home = () => {
     if (!token) return;
     const fetchWishlist = async () => {
       try {
-        const res = await axios.get(`${API}/wishlist`, { headers: { Authorization: `Bearer ${token}` } });
+const res = await api.get(`/wishlist`);;
         const ids = new Set(res.data.wishlist.map((p) => p.id));
         setWishlistItems(ids);
       } catch (err) { console.log("Wishlist not loaded"); }
@@ -126,19 +124,14 @@ const Home = () => {
     try {
         if (wishlistItems.has(product.id)) {
             // Delete from database
-            await axios.delete(`${API}/wishlist/${product.id}`, { 
-                headers: { Authorization: `Bearer ${token}` } 
-            });
-            
+          await api.delete(`/wishlist/${product.id}`);
             // Update local state for the heart color
             const updated = new Set(wishlistItems); 
             updated.delete(product.id); 
             setWishlistItems(updated);
         } else {
             // Add to database
-            await axios.post(`${API}/wishlist`, { product_id: product.id }, { 
-                headers: { Authorization: `Bearer ${token}` } 
-            });
+          await api.post('/wishlist', { product_id: product.id });
             
             // Update local state for the heart color
             const updated = new Set(wishlistItems); 

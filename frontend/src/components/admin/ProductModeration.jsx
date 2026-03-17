@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+
+import api from "../utils/api"; 
 import toast from "react-hot-toast";
-import { Search, CheckCircle, XCircle, Package, ShieldCheck, Info, Store } from "lucide-react";
+import { Search, CheckCircle, XCircle, Package, ShieldCheck, Info, Store } from "lucide-center";
 
 const ProductModeration = () => {
   const [products, setProducts] = useState([]);
@@ -11,8 +12,8 @@ const ProductModeration = () => {
   const fetchPendingProducts = async () => {
     try {
       setLoading(true);
-      // Ensure this matches your route in admin.routes.js
-      const res = await axios.get("/admin/products/pending");
+      
+      const res = await api.get("/admin/products/pending");
       setProducts(res.data);
     } catch (error) {
       console.error("Error fetching products", error);
@@ -27,7 +28,8 @@ const ProductModeration = () => {
 
   const approveProduct = async (id) => {
     try {
-      await axios.patch(`/admin/products/${id}/approve`);
+      
+      await api.patch(`/admin/products/${id}/approve`);
       toast.success("Product approved successfully!");
       fetchPendingProducts();
     } catch (error) {
@@ -38,8 +40,9 @@ const ProductModeration = () => {
 
   const rejectProduct = async (id) => {
     try {
-      await axios.patch(`/admin/products/${id}/reject`);
-      toast.error("Product has been rejected"); // Red popup
+      
+      await api.patch(`/admin/products/${id}/reject`);
+      toast.error("Product has been rejected"); 
       fetchPendingProducts();
     } catch (error) {
       toast.error("Failed to reject product");

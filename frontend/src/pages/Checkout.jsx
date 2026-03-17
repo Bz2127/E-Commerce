@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import axios from 'axios';
+
+import api from '../utils/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Truck, CreditCard, ChevronRight, X, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -74,7 +75,6 @@ const Checkout = () => {
       return;
     }
 
-    const token = localStorage.getItem('token');
     setLoading(true);
 
     try {
@@ -97,12 +97,8 @@ const Checkout = () => {
         }
       };
 
-      const res = await axios.post('http://localhost:5000/api/orders/create', orderData, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+ 
+      const res = await api.post('/orders/create', orderData);
 
       if (res.data && res.data.checkout_url) {
         window.location.href = res.data.checkout_url;
@@ -122,7 +118,6 @@ const Checkout = () => {
 
   return (
     <div style={styles.containerStyle}>
-      {/* PROFESSIONAL FLOATING NOTIFICATION (Matches image_5af5dd.png style) */}
       <AnimatePresence>
         {notification.show && (
           <motion.div 
@@ -151,7 +146,6 @@ const Checkout = () => {
       </div>
 
       <div style={styles.contentGrid}>
-        {/* LEFT: BILLING FORM */}
         <div style={styles.formSection}>
           <div style={styles.sectionHeader}>
             <Truck size={22} color="#10b981" />
@@ -188,7 +182,6 @@ const Checkout = () => {
           </div>
         </div>
 
-        {/* RIGHT: ORDER SUMMARY */}
         <div style={styles.summaryContainer}>
           <div style={styles.sectionHeader}>
             <CreditCard size={20} color="#10b981" />
@@ -245,7 +238,6 @@ const Checkout = () => {
   );
 };
 
-// --- STYLES ---
 const styles = {
   containerStyle: { padding: '40px 10%', background: '#f8fafc', minHeight: '100vh', fontFamily: "'Inter', sans-serif" },
   pageTitle: { fontSize: '36px', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-1.5px' },
@@ -272,8 +264,6 @@ const styles = {
     boxShadow: '0 10px 15px rgba(16, 185, 129, 0.2)', transition: '0.2s', opacity: loading ? 0.7 : 1
   }),
   secureFooter: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '20px', color: '#475569', fontSize: '10px', fontWeight: '700' },
-  
-  // --- POPUP STYLES (MATCHES image_5af5dd.png) ---
   popupContainer: { position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 },
   popupContent: { 
     background: 'white', 

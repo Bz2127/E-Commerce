@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+
+import api from '../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
-// ✅ FIXED: Removed unused ArrowLeft to clear the warning
 import { Trash2, ShoppingCart, Package, X, CheckCircle2, AlertCircle, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -21,7 +21,6 @@ const Wishlist = () => {
     setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  // ✅ PRESERVED: Same Logic as your original code
   const fetchWishlist = useCallback(async () => {
     if (!token) {
       setError('Please login to view wishlist');
@@ -32,9 +31,8 @@ const Wishlist = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('http://localhost:5000/api/wishlist', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+     
+      const response = await api.get('/wishlist');
       setWishlist(response.data.wishlist || []);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load wishlist');
@@ -59,10 +57,7 @@ const Wishlist = () => {
       };
 
       addToCart(cartItem); 
-      
-      await axios.delete(`http://localhost:5000/api/wishlist/${product.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/wishlist/${product.id}`);
       
       setWishlist(prev => prev.filter(item => item.id !== product.id));
       triggerPopup(`"${product.name}" moved to cart!`, 'success');
@@ -73,9 +68,8 @@ const Wishlist = () => {
 
   const removeFromWishlist = async (productId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/wishlist/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      
+      await api.delete(`/wishlist/${productId}`);
       setWishlist(prev => prev.filter(item => item.id !== productId));
       triggerPopup('Item removed from wishlist', 'success');
     } catch (err) {
@@ -85,13 +79,11 @@ const Wishlist = () => {
 
   const moveAllToCart = async () => {
     try {
-      // eslint-disable-next-line
       for (const item of wishlist) {
         if (item.stock_quantity > 0) {
           addToCart(item); 
-          await axios.delete(`http://localhost:5000/api/wishlist/${item.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+        
+          await api.delete(`/wishlist/${item.id}`);
         }
       }
       setWishlist([]);

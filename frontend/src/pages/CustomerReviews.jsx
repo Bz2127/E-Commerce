@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Star, MessageSquare, ArrowLeft } from 'lucide-react'; // ✅ REMOVED: Flag
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // ✅ REMOVED: useParams
+import { Star, MessageSquare, ArrowLeft } from 'lucide-react';
+
+import api from '../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 const CustomerReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -17,9 +18,8 @@ const CustomerReviews = () => {
 
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/reviews/my-reviews', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      
+      const response = await api.get('/reviews/my-reviews');
       setReviews(response.data.reviews || []);
     } catch (err) {
       console.error('Reviews fetch error:', err);
@@ -40,16 +40,22 @@ const CustomerReviews = () => {
     <div style={container}>
       <div style={header}>
         <button onClick={() => navigate(-1)} style={backBtn}>
-          <ArrowLeft size={20} /> My Reviews
+          <ArrowLeft size={20} /> Back
         </button>
-        <h1 style={title}>Your Reviews</h1>
+        <h1 style={title}>Your <span style={{color: '#10b981'}}>Eth</span>market Reviews</h1>
       </div>
 
       {reviews.length === 0 ? (
         <div style={emptyState}>
           <MessageSquare size={48} color="#64748b" />
-          <h3>No reviews yet</h3>
-          <p>Write reviews for your purchased products to help others!</p>
+          <h3 style={{ marginTop: '20px' }}>No reviews yet</h3>
+          <p style={{ color: '#64748b' }}>Write reviews for your purchased products to help others!</p>
+          <button 
+            onClick={() => navigate('/shop')} 
+            style={{ ...backBtn, background: '#0f172a', color: 'white', padding: '10px 20px', borderRadius: '8px', marginTop: '20px' }}
+          >
+            Go Shopping
+          </button>
         </div>
       ) : (
         <div style={reviewsGrid}>
@@ -78,7 +84,12 @@ const CustomerReviews = () => {
               )}
               
               {review.image_url && (
-                <img src={review.image_url} alt="Product" style={productImage} />
+                <img 
+                  src={review.image_url} 
+                  alt="Product" 
+                  style={productImage} 
+                  onError={(e) => { e.target.style.display = 'none' }}
+                />
               )}
             </div>
           ))}
@@ -88,20 +99,20 @@ const CustomerReviews = () => {
   );
 };
 
-// COMPLETE STYLES (all included)
-const container = { padding: '60px 8%', minHeight: '80vh', background: '#f8fafc' };
+// --- STYLES ---
+const container = { padding: '60px 8%', minHeight: '80vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" };
 const header = { marginBottom: '40px' };
-const backBtn = { display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', fontSize: '18px', fontWeight: '600', color: '#3b82f6', cursor: 'pointer', padding: '8px 0' };
-const title = { fontSize: '28px', fontWeight: '700', color: '#0f172a', margin: '20px 0 0 0' };
-const emptyState = { textAlign: 'center', padding: '100px 40px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' };
-const reviewsGrid = { display: 'grid', gap: '24px', maxWidth: '800px' };
-const reviewCard = { background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' };
+const backBtn = { display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', fontSize: '16px', fontWeight: '700', color: '#10b981', cursor: 'pointer', padding: '8px 0', transition: '0.2s' };
+const title = { fontSize: '32px', fontWeight: '800', color: '#0f172a', margin: '15px 0 0 0', letterSpacing: '-1px' };
+const emptyState = { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 40px', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' };
+const reviewsGrid = { display: 'grid', gap: '20px', maxWidth: '850px' };
+const reviewCard = { background: 'white', padding: '28px', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9', transition: '0.3s' };
 const reviewHeader = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' };
-const starsContainer = { display: 'flex', gap: '2px' };
-const dateText = { color: '#64748b', fontSize: '14px' };
-const productName = { fontSize: '18px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' };
-const commentText = { color: '#475569', lineHeight: '1.6', marginBottom: '16px' };
-const productImage = { width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', marginTop: '12px' };
-const loadingStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', color: '#64748b' };
+const starsContainer = { display: 'flex', gap: '4px' };
+const dateText = { color: '#94a3b8', fontSize: '13px', fontWeight: '600' };
+const productName = { fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '10px' };
+const commentText = { color: '#475569', lineHeight: '1.7', marginBottom: '16px', fontSize: '15px' };
+const productImage = { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '12px', marginTop: '10px', border: '1px solid #f1f5f9' };
+const loadingStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: '#10b981', fontSize: '20px', fontWeight: '700' };
 
 export default CustomerReviews;

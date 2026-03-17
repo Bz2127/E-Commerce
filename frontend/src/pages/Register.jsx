@@ -93,7 +93,7 @@ const Register = ({ isSellerRegistration = false }) => {
   setLoading(true);
 
   try {
-    // 1. Verify OTP (Using relative path to match your axios config)
+   
     await api.post('/auth/verify-otp', {
       email: userEmail,
       otp: otp.trim()

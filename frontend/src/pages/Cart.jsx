@@ -10,7 +10,6 @@ const Cart = () => {
   const { user } = useAuth(); 
   const navigate = useNavigate();
 
-  // --- ETHMARKET NOTIFICATION STATE ---
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
 
   const triggerPopup = (message, type = 'success') => {
@@ -18,13 +17,12 @@ const Cart = () => {
     setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  // Requirement 3.2.5 - Auth Protected Checkout
   const handleCheckout = () => {
     if (user) {
       navigate('/checkout');
     } else {
-      // ✅ Using Ethmarket branding (no space) for the login guard
       triggerPopup("Please log in to your Ethmarket account to proceed.", "error");
+      // Exam Tip: Delaying navigation allows the user to actually read the error message
       setTimeout(() => navigate('/login'), 2000);
     }
   };
@@ -33,7 +31,6 @@ const Cart = () => {
 
   return (
     <div style={styles.pageContainer}>
-      {/* BRANDED PILL POPUP - Exact Match to image_5af5dd.png */}
       <AnimatePresence>
         {notification.show && (
           <motion.div 
@@ -90,18 +87,18 @@ const Cart = () => {
                         src={
                           item.image_url ? item.image_url : 
                           (Array.isArray(item.images) && item.images.length > 0) ? item.images[0] : 
-                          "https://placehold.jp/100x100.png"
+                          "https://placehold.jp/100x100.png?text=No+Image"
                         } 
                         width="70" 
                         height="70" 
                         style={styles.imgStyle} 
                         alt={item.name} 
-                        onError={(e) => { e.target.src = "https://placehold.jp/100x100.png" }}
+                        onError={(e) => { e.target.src = "https://placehold.jp/100x100.png?text=Ethmarket" }}
                       />
                       <div>
                         <Link to={`/product/${item.id}`} style={styles.nameLink}>{item.name}</Link>
                         <div style={styles.vendorSmall}>
-                          Vendor: <span style={{color: '#10b981', fontWeight: '700'}}>Ethmarket Verified</span>
+                          Vendor: <span style={{color: '#10b981', fontWeight: '700'}}>{item.business_name || 'Ethmarket Verified'}</span>
                         </div>
                       </div>
                     </td>
@@ -139,8 +136,6 @@ const Cart = () => {
                       <button 
                         style={styles.deleteBtn}
                         onClick={() => {
-                          // Standard exam console log
-                          console.log("Removing item:", item.id, "Variant:", item.variant_id);
                           removeFromCart(item.id, item.variant_id);
                           triggerPopup(`${item.name} removed from bag`);
                         }} 
@@ -189,7 +184,6 @@ const Cart = () => {
   );
 };
 
-// --- STYLES ---
 const styles = {
   pageContainer: { padding: '60px 8%', minHeight: '85vh', background: '#f8fafc', fontFamily: "'Inter', sans-serif" },
   titleStyle: { display: 'flex', alignItems: 'center', gap: '15px', fontSize: '32px', fontWeight: '800', marginBottom: '40px', color: '#0f172a', letterSpacing: '-1.5px' },
@@ -217,7 +211,6 @@ const styles = {
   hrStyle: { border: 'none', borderTop: '1px solid #1e293b', margin: '25px 0' },
   emptyContainer: { textAlign: 'center', padding: '100px 0', background: 'white', borderRadius: '32px', border: '1px solid #f1f5f9' },
   shopBtn: { marginTop: '25px', background: '#0f172a', color: 'white', border: 'none', padding: '14px 30px', borderRadius: '14px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', fontWeight: '700' },
-
   popupContainer: { position: 'fixed', top: '30px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 },
   popupContent: { background: 'white', padding: '10px 24px', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #10b981' },
   iconWrapper: { background: '#f0fdf4', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' },

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api'
 import { Heart, ShoppingBag, ArrowLeft, Truck, ShieldCheck, Star, Minus, Plus, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../context/CartContext'; 
 import { useAuth } from '../context/AuthContext'; 
@@ -43,7 +43,7 @@ const colors = product?.variants
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/review/product/${id}`);
+        const res = await api.get(`/review/product/${id}`);
         setReviews(res.data.reviews || []);
         setProduct(prev => ({ ...prev, avg_rating: res.data.stats.avg_rating }));
       } catch (err) {
@@ -59,7 +59,7 @@ const handleReviewSubmit = async (e) => {
     
     try {
       setReviewLoading(true);
-      await axios.post('http://localhost:5000/api/review', { 
+      await api.post('/review', { 
         product_id: id, 
         rating: newReview.rating, 
         comment: newReview.comment 
@@ -85,11 +85,9 @@ const handleReviewSubmit = async (e) => {
   const handleDeleteReview = async (reviewId) => {
     if (!window.confirm("Are you sure you want to delete your review?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/review/${reviewId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+     await api.delete(`/review/${reviewId}`);
       setReviews(reviews.filter(r => r.id !== reviewId));
-      triggerToast("✅ Review deleted successfully!");
+      triggerToast(" Review deleted successfully!");
     } catch (err) {
       triggerToast("Error deleting review.", "error");
     }
@@ -99,7 +97,7 @@ const handleReviewSubmit = async (e) => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/products/details/${id}`);
+        const res = await api.get(`/products/details/${id}`);
         setProduct(res.data);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -113,10 +111,7 @@ const handleReviewSubmit = async (e) => {
   const checkWishlistStatus = useCallback(async () => {
     if (!token || !product?.id) return;
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/wishlist/${product.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+     const response = await api.get(`/wishlist/${product.id}`);
       setIsInWishlist(response.data.inWishlist);
     } catch {
       setIsInWishlist(false);
@@ -132,13 +127,13 @@ const handleReviewSubmit = async (e) => {
     setWishlistLoading(true);
     try {
       if (isInWishlist) {
-        await axios.delete(`http://localhost:5000/api/wishlist/${product.id}`, {
+        await api.delete(`/wishlist/${product.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setIsInWishlist(false);
         triggerToast('Removed from wishlist');
       } else {
-        await axios.post('http://localhost:5000/api/wishlist', {
+        await api.post('/wishlist', {
           product_id: product.id
         }, {
           headers: { Authorization: `Bearer ${token}` }

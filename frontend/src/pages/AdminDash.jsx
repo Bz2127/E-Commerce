@@ -38,9 +38,9 @@ import TransactionManagement from "../components/admin/TransactionManagement";
 
 const AdminDash = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Initializing as true to handle auth check
   const [error, setError] = useState('');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // New state for sidebar toggle
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); 
 
   const [revenue, setRevenue] = useState(0);
   const [orders, setOrders] = useState(0);
@@ -55,6 +55,7 @@ const AdminDash = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading } = useAuth(); 
 
+  // Security and Navigation Check
   useEffect(() => {
     if (authLoading) return;
     
@@ -73,8 +74,9 @@ const AdminDash = () => {
     setLoading(false);
   }, [user, isAdmin, authLoading, navigate]);
 
+  // Analytics Fetching
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || loading) return;
 
     const fetchAnalytics = async () => {
       try {
@@ -82,9 +84,9 @@ const AdminDash = () => {
         const orderRes = await api.get(`/admin/analytics/orders?range=${range}`);
         const topRes = await api.get(`/admin/analytics/top-products?range=${range}`);
 
-        const revenueJson = revenueRes.data;
-        const orderJson = orderRes.data;
-        const topJson = topRes.data;
+        const revenueJson = revenueRes.data || [];
+        const orderJson = orderRes.data || [];
+        const topJson = topRes.data || [];
 
         const totalRevenue = revenueJson.reduce((sum, r) => sum + Number(r.revenue || 0), 0);
         const totalOrders = orderJson.reduce((sum, o) => sum + Number(o.orders || 0), 0);
@@ -101,7 +103,7 @@ const AdminDash = () => {
     };
 
     fetchAnalytics();
-  }, [isAdmin, range]);
+  }, [isAdmin, range, loading]);
 
   if (loading || authLoading) {
     return (
@@ -177,7 +179,7 @@ const AdminDash = () => {
       <aside
         style={{
           ...styles.sidebar,
-          width: isSidebarCollapsed ? "80px" : "280px", // Dynamic width
+          width: isSidebarCollapsed ? "80px" : "280px",
           transform: mobileMenuOpen ? "translateX(0)" : "",
         }}
       >
@@ -196,7 +198,6 @@ const AdminDash = () => {
           {isSidebarCollapsed && <div style={styles.logoBadge}>E</div>}
         </div>
 
-        {/* Toggle Button */}
         <button 
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
           style={styles.sidebarToggleBtn}
@@ -204,7 +205,7 @@ const AdminDash = () => {
           {isSidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
 
-       <nav style={styles.navMenu}>
+        <nav style={styles.navMenu}>
           {menuSections.map((section) => (
             <div key={section.title} style={styles.menuSection}>
               {!isSidebarCollapsed && <p style={styles.menuTitle}>{section.title}</p>}
@@ -243,7 +244,7 @@ const AdminDash = () => {
 
       <main style={{ 
         ...styles.mainContent, 
-        marginLeft: isSidebarCollapsed ? '80px' : '280px' // Dynamic margin
+        marginLeft: isSidebarCollapsed ? '80px' : '280px' 
       }}>
         <header style={styles.contentHeader}>
           <div style={styles.headerLeft}>
@@ -336,61 +337,24 @@ const AdminDash = () => {
   );
 };
 
+// --- STYLES (As provided by you) ---
 const styles = {
-  dashboardWrapper: {
-    display: 'flex',
-    minHeight: '100vh',
-    backgroundColor: '#f1f5f9',
-    fontFamily: "'Inter', system-ui, sans-serif",
-  },
+  dashboardWrapper: { display: 'flex', minHeight: '100vh', backgroundColor: '#f1f5f9', fontFamily: "'Inter', sans-serif" },
   sidebar: {
-    height: "100vh",
-    background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)",
-    color: "white",
-    display: "flex",
-    flexDirection: "column",
-    position: "fixed",
-    left: 0,
-    top: 0,
-    zIndex: 1000,
-    transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    boxShadow: "4px 0 24px rgba(0,0,0,0.1)",
+    height: "100vh", background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)", color: "white", 
+    display: "flex", flexDirection: "column", position: "fixed", left: 0, top: 0, zIndex: 1000, 
+    transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)", boxShadow: "4px 0 24px rgba(0,0,0,0.1)",
   },
   sidebarToggleBtn: {
-    position: 'absolute',
-    right: '-12px',
-    top: '40px',
-    width: '24px',
-    height: '24px',
-    borderRadius: '50%',
-    backgroundColor: '#10b981',
-    border: 'none',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-    zIndex: 1001
+    position: 'absolute', right: '-12px', top: '40px', width: '24px', height: '24px', borderRadius: '50%',
+    backgroundColor: '#10b981', border: 'none', color: 'white', display: 'flex', alignItems: 'center',
+    justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.2)', zIndex: 1001
   },
-  sidebarHeader: {
-    padding: '32px 20px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderBottom: '1px solid rgba(255,255,255,0.08)',
-  },
+  sidebarHeader: { padding: '32px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)' },
   logoBadge: {
-    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    minWidth: '40px',
-    height: '40px',
-    borderRadius: '10px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: '900',
-    fontSize: '20px',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', minWidth: '40px', height: '40px',
+    borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900',
+    fontSize: '20px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
   },
   sidebarTitle: { fontSize: '20px', fontWeight: '800', margin: 0, letterSpacing: '-0.5px' },
   welcomeUser: { fontSize: '11px', color: '#94a3b8', margin: '2px 0 0 0', textTransform: 'uppercase', fontWeight: '600' },
@@ -398,71 +362,45 @@ const styles = {
   menuSection: { marginBottom: "24px" },
   menuTitle: { fontSize: "11px", textTransform: "uppercase", letterSpacing: "1.2px", color: "#475569", margin: "0 12px 10px 12px", fontWeight: "800" },
   navItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    width: '100%',
-    padding: '10px 14px',
-    margin: '2px 0',
-    border: 'none',
-    borderRadius: '8px',
-    backgroundColor: 'transparent',
-    color: '#94a3b8',
-    cursor: 'pointer',
-    textAlign: 'left',
-    fontSize: '14px',
-    fontWeight: '500',
-    transition: '0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap'
+    display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '10px 14px', margin: '2px 0',
+    border: 'none', borderRadius: '8px', backgroundColor: 'transparent', color: '#94a3b8', cursor: 'pointer',
+    textAlign: 'left', fontSize: '14px', fontWeight: '500', transition: '0.2s', overflow: 'hidden', whiteSpace: 'nowrap'
   },
   activeNavItem: { backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: '600' },
   icon: { color: '#64748b', transition: '0.2s', minWidth: '20px' },
   activeIcon: { color: '#10b981', minWidth: '20px' },
   sidebarFooter: { padding: '20px', borderTop: '1px solid rgba(255,255,255,0.08)' },
   backBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    width: '100%',
-    padding: '12px',
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '10px',
-    color: '#cbd5e1',
-    cursor: 'pointer',
-    fontSize: '13px',
-    transition: '0.3s',
-    overflow: 'hidden'
+    display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '12px', 
+    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', 
+    borderRadius: '10px', color: '#cbd5e1', cursor: 'pointer', fontSize: '13px'
   },
   mainContent: { flex: 1, padding: '40px', transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)' },
   contentHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px' },
   headerLeft: { display: "flex", alignItems: "center", gap: "16px" },
-  mobileMenuBtn: { display: 'none', background: "white", border: "none", cursor: "pointer", padding: "8px", borderRadius: "8px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" },
+  mobileMenuBtn: { display: 'none', background: "white", border: "none", cursor: "pointer", padding: "8px", borderRadius: "8px" },
   pageTitle: { fontSize: '32px', fontWeight: '900', color: '#1e293b', margin: 0, letterSpacing: '-1px' },
   pageSubtitle: { color: '#64748b', margin: '4px 0 0 0', fontSize: '15px' },
   statusIndicator: { fontSize: '12px', background: '#dcfce7', color: '#15803d', padding: '6px 16px', borderRadius: '30px', fontWeight: '700', border: '1px solid #b9f6ca' },
   card: { background: '#ffffff', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', minHeight: '500px', border: '1px solid #e2e8f0' },
-  
   filterBar: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px', background: '#f8fafc', padding: '15px', borderRadius: '12px' },
-  selectInput: { padding: "10px 16px", borderRadius: "10px", border: "1px solid #e2e8f0", background: "white", fontSize: "14px", fontWeight: "600", color: "#1e293b", cursor: "pointer" },
+  selectInput: { padding: "10px 16px", borderRadius: "10px", border: "1px solid #e2e8f0", background: "white", fontSize: "14px", fontWeight: "600", color: "#1e293b" },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '40px' },
   statCard: { padding: '28px', background: '#ffffff', borderRadius: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' },
-  statLabel: { fontSize: '13px', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', margin: '10px 0 4px 0', letterSpacing: '0.5px' },
+  statLabel: { fontSize: '13px', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', margin: '10px 0 4px 0' },
   tableCard: { background: '#f8fafc', padding: '30px', borderRadius: '20px', border: '1px solid #e2e8f0' },
   tableTitle: { fontSize: '20px', fontWeight: '800', color: '#1e293b', margin: 0 },
-  listItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px', background: 'white', borderRadius: '14px', marginBottom: '12px', border: '1px solid #f1f5f9' },
+  listItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px', background: 'white', borderRadius: '14px', marginBottom: '12px' },
   badgeSuccess: { background: '#ecfdf5', color: '#10b981', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' },
-  primaryBtn: { padding: '12px 24px', background: '#10b981', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', marginTop: '20px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' },
-  
+  primaryBtn: { padding: '12px 24px', background: '#10b981', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', marginTop: '20px' },
   overlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15, 23, 42, 0.6)", zIndex: 900, backdropFilter: 'blur(4px)' },
   loadingWrapper: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f8fafc' },
   loadingSpinner: { textAlign: 'center' },
   loadingText: { marginTop: '20px', fontSize: '18px', fontWeight: '600', color: '#475569' },
-  errorWrapper: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#fff' },
+  errorWrapper: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' },
   errorIcon: { color: '#ef4444' },
   errorTitle: { fontSize: '28px', fontWeight: '800', margin: '10px 0' },
-  errorBtn: { background: '#1e293b', color: 'white', padding: '12px 30px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }
+  errorBtn: { background: '#1e293b', color: 'white', padding: '12px 30px', border: 'none', borderRadius: '8px', cursor: 'pointer' }
 };
 
 export default AdminDash;

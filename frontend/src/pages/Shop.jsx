@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api'
 import { Filter, ChevronDown, ShoppingCart, Star, Heart, LayoutGrid, CheckCircle2, X } from 'lucide-react';
 import { useCart } from '../context/CartContext'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +37,7 @@ const Shop = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/categories");
+        const res = await api.get("/categories");
         setCategories(Array.isArray(res.data) ? res.data : res.data.data || []);
       } catch (err) {
         console.log("Failed to load categories");
@@ -55,7 +55,7 @@ const Shop = () => {
       const keyword = queryParams.get('keyword'); 
 
       try {
-        const response = await axios.get(`http://localhost:5000/api/products/all`, {
+        const response = await api.get(`/products/all`, {
           params: {
             maxPrice: price,
             category: selectedCategory === 'All' ? undefined : selectedCategory,
@@ -80,9 +80,7 @@ const Shop = () => {
     if (!token) return;
     const fetchWishlist = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/wishlist', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+      const response = await api.get('/wishlist');
         const wishlistSet = new Set(response.data.wishlist.map(item => item.id));
         setWishlistItems(wishlistSet);
       } catch (err) {
@@ -111,9 +109,7 @@ const Shop = () => {
 
     try {
       if (wishlistItems.has(product.id)) {
-        await axios.delete(`http://localhost:5000/api/wishlist/${product.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+       await api.delete(`/wishlist/${product.id}`);
         setWishlistItems(prev => {
           const newSet = new Set(prev);
           newSet.delete(product.id);
@@ -121,7 +117,7 @@ const Shop = () => {
         });
         triggerNotif('Removed from wishlist');
       } else {
-        await axios.post('http://localhost:5000/api/wishlist', {
+        await api.post('/wishlist', {
           product_id: product.id
         }, {
           headers: { Authorization: `Bearer ${token}` }

@@ -1,13 +1,8 @@
 import axios from "axios";
-
-// This checks if the website is running on Render
-const isLive = window.location.hostname.includes("render.com");
+const baseURL = process.env.REACT_APP_API_URL || "https://ecommerce-backend-t7o6.onrender.com/api";
 
 const api = axios.create({
-  // We use the full URL for live, and the full localhost URL for local
-  baseURL: isLive 
-    ? "https://ecommerce-backend-t7o6.onrender.com/api" 
-    : "http://localhost:5000/api", 
+  baseURL: baseURL,
   withCredentials: true,
 });
 
