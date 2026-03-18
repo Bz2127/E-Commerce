@@ -1,5 +1,6 @@
 // src/components/admin/SellerApprovals.jsx - REAL API + 0 ESLint Errors
 import React, { useState, useEffect } from 'react';
+import api from "../../utils/api"
 import { 
   CheckCircle, XCircle, Building2, FileCheck, Phone, Mail, Calendar, UserCheck, ShieldAlert, Loader2
 } from 'lucide-react';
@@ -30,19 +31,13 @@ const SellerApprovals = () => {
     try {
       setLoading(true);
       setError('');
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/sellers/pending', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+   const response = await api.get('/admin/sellers/pending');
       
       if (!response.ok) {
         throw new Error('Failed to fetch pending sellers');
       }
       
-      const sellers = await response.json();
+      const sellers = response.data;
       // Map backend data to match frontend expectations
       const formattedSellers = sellers.map(seller => ({
         id: seller.id,
@@ -62,39 +57,30 @@ const SellerApprovals = () => {
     }
   };
 
-  // REAL API: Approve/Reject sellers
+  
   const handleAction = async (id, status) => {
-    try {
-      setActionLoading(prev => ({ ...prev, [id]: true }));
-      
-      const token = localStorage.getItem('token');
-      const endpoint = `/api/admin/sellers/${id}/approve`;
-      
-      const response = await fetch(endpoint, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+  try {
+    setActionLoading(prev => ({ ...prev, [id]: true }));
 
-      if (!response.ok) {
-        throw new Error('Failed to update seller status');
-      }
+    
+    await api.patch(`/admin/sellers/${id}/approve`, {
+      status 
+    });
 
-      // Remove from list (approved/rejected)
-      setPendingSellers(prev => prev.filter(seller => seller.id !== id));
-      alert(`Seller ${status} successfully!`);
-      
-      // Refresh list
-      await fetchPendingSellers();
-    } catch (err) {
-      alert("Failed to update seller status");
-      console.error("Action error:", err);
-    } finally {
-      setActionLoading(prev => ({ ...prev, [id]: false }));
-    }
-  };
+    
+    setPendingSellers(prev => prev.filter(seller => seller.id !== id));
+
+    alert(`Seller ${status} successfully!`);
+
+    await fetchPendingSellers();
+
+  } catch (err) {
+    alert("Failed to update seller status");
+    console.error("Action error:", err);
+  } finally {
+    setActionLoading(prev => ({ ...prev, [id]: false }));
+  }
+};
 
   const styles = {
     wrapper: {

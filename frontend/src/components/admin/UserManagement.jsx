@@ -1,6 +1,7 @@
 // src/components/admin/UserManagement.jsx - REAL API + 0 ESLint Errors
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserX, UserCheck, Search, ShieldAlert } from 'lucide-react';
+import api from "../../utils/api"
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -17,13 +18,8 @@ const UserManagement = () => {
     try {
       setLoading(true);
       setError('');
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      
+const response = await api.get('/admin/users');
       
       if (!response.ok) {
         throw new Error('Failed to fetch users');
@@ -62,24 +58,17 @@ const UserManagement = () => {
       setActionLoading(prev => ({ ...prev, [user.id]: true }));
       
       const newStatus = user.status === 'active' ? 'suspended' : 'active';
-      const token = localStorage.getItem('token');
+    
       
       // Close modal immediately for smooth UX
       setConfirmModal({ show: false, user: null });
 
       // FIXED: Changed URL to /api/admin/users/:id/status and method to PATCH to match your routes
-      const response = await fetch(`/api/admin/users/${user.id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
+  await api.patch(`/admin/users/${user.id}/status`, {
+  status: newStatus
+});
 
-      if (!response.ok) {
-        throw new Error('Failed to update user status');
-      }
+      
 
       // Update local state immediately
       setUsers(prev => prev.map(u => 
