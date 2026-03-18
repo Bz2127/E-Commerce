@@ -28,34 +28,34 @@ const SellerApprovals = () => {
 
   // REAL API: Fetch pending sellers
   const fetchPendingSellers = async () => {
-    try {
-      setLoading(true);
-      setError('');
-   const response = await api.get('/admin/sellers/pending');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch pending sellers');
-      }
-      
-      const sellers = response.data;
-      // Map backend data to match frontend expectations
-      const formattedSellers = sellers.map(seller => ({
-        id: seller.id,
-        name: seller.name,
-        email: seller.email,
-        phone: seller.phone || 'N/A',
-        businessName: seller.business_name || 'No business name',
-        licenseNumber: seller.business_license || 'N/A',
-        created_at: seller.created_at
-      }));
-      setPendingSellers(formattedSellers);
-    } catch (err) {
-      setError('Failed to load sellers');
-      console.error("Error fetching sellers:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    setError('');
+
+    const response = await api.get('/admin/sellers/pending');
+
+    
+    const sellers = response.data;
+
+    const formattedSellers = sellers.map(seller => ({
+      id: seller.id,
+      name: seller.name,
+      email: seller.email,
+      phone: seller.phone || 'N/A',
+      businessName: seller.business_name || 'No business name',
+      licenseNumber: seller.business_license || 'N/A',
+      created_at: seller.created_at
+    }));
+
+    setPendingSellers(formattedSellers);
+
+  } catch (err) {
+    console.error("REAL ERROR:", err.response || err);
+    setError('Failed to load sellers');
+  } finally {
+    setLoading(false);
+  }
+};
 
   
   const handleAction = async (id, status) => {

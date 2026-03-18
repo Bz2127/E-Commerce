@@ -14,36 +14,33 @@ const UserManagement = () => {
   const [confirmModal, setConfirmModal] = useState({ show: false, user: null });
 
   // REAL API: Fetch all users
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-const response = await api.get('/admin/users');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      
-      const usersData = await response.json();
-      // Map backend data to match frontend expectations
-      const formattedUsers = usersData.map(user => ({
-        id: user.id || user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        status: user.status || 'active',
-        phone: user.phone || 'N/A',
-        created_at: user.created_at || user.createdAt
-      }));
-      setUsers(formattedUsers);
-    } catch (err) {
-      setError('Failed to load users');
-      console.error("Failed to fetch users:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+ const fetchUsers = useCallback(async () => {
+  try {
+    setLoading(true);
+    setError('');
+    
+    const response = await api.get('/admin/users');
+    const usersData = response.data;
+
+    const formattedUsers = usersData.map(user => ({
+      id: user.id || user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status || 'active',
+      phone: user.phone || 'N/A',
+      created_at: user.created_at || user.createdAt
+    }));
+
+    setUsers(formattedUsers);
+
+  } catch (err) {
+    console.error("REAL ERROR:", err.response || err);
+    setError('Failed to load users');
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     fetchUsers();
