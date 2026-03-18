@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
-import axios from "axios";
+import api from "../utils/api"
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const res = await axios.get("http://localhost:5000/api/wishlist", {
+      const res = await api.get("/wishlist", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setWishlist(res.data.wishlist || []);
@@ -58,7 +58,7 @@ export const CartProvider = ({ children }) => {
     if (!user?.id || cart.length === 0) return;
     try {
       setIsLoading(true);
-      await axios.post("http://localhost:5000/api/cart/sync", {
+      await api.post("/cart/sync", {
         cart: cart.map((item) => ({
           ...item,
           variant_id: item.variant_id || null 
