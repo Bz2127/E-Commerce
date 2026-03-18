@@ -23,7 +23,7 @@ const initializePayment = async (req, res) => {
         first_name,
         last_name,
         tx_ref,
-       callback_url: `https://your-backend.onrender.com/api/payment/verify/${tx_ref}`,
+       callback_url: `https://ecommerce-backend-t706.onrender.com/api/payment/verify/${tx_ref}`,
 return_url: `https://ecommerce-frontend-6y9o.onrender.com/payment-success?trx_ref=${tx_ref}`
       },
       {
